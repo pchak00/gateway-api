@@ -1,0 +1,83 @@
+package com.prakash.gateaway_service.Entity;
+
+import io.lettuce.core.dynamic.annotation.CommandNaming;
+import jakarta.persistence.*;
+import org.hibernate.annotations.AnyDiscriminatorImplicitValues;
+
+@Entity
+public class Client {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+    @Column(unique = true)
+    private String apiKey;
+
+    private Integer requestsPerMinute;
+
+    private Boolean active;
+
+    @Override
+    public String toString() {
+        return "Client{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", apiKey='" + apiKey + '\'' +
+                ", requestsPerMinute=" + requestsPerMinute +
+                ", active=" + active +
+                '}';
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getApiKey() {
+        return apiKey;
+    }
+
+    public void setApiKey(String apiKey) {
+        this.apiKey = apiKey;
+    }
+
+    public Integer getRequestsPerMinute() {
+        return requestsPerMinute;
+    }
+
+    public void setRequestsPerMinute(Integer requestsPerMinute) {
+        this.requestsPerMinute = requestsPerMinute;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public Client() {
+    }
+
+    public Client(Long id, String name, String apiKey, Integer requestsPerMinute, Boolean active) {
+        this.id = id;
+        this.name = name;
+        this.apiKey = apiKey;
+        this.requestsPerMinute = requestsPerMinute;
+        this.active = active;
+    }
+}
