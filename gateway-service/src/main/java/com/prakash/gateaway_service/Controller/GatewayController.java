@@ -20,7 +20,7 @@ public class GatewayController {
     public Client createClient(@RequestBody ClientRequestDto clientRequest) {
         Client client = new Client();
         client.setName(clientRequest.name());
-        client.setRequestsPerMinute(clientRequest.requestPerMinute());
+        client.setRequestsPerMinute(clientRequest.requestsPerMinute());
         client.setActive(clientRequest.active());
         client.setApiKey(UUID.randomUUID().toString()); // api key generator
 
