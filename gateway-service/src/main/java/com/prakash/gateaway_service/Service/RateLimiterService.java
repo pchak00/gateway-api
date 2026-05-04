@@ -1,5 +1,6 @@
 package com.prakash.gateaway_service.Service;
 
+import com.prakash.gateaway_service.Entity.Plan;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,7 @@ public class RateLimiterService {
         this.redisTemplate = redisTemplate;
     }
 
-    public boolean isAllowed(String apiKey, int limitPerMinute) {
+    public boolean isAllowed(String apiKey, Integer limit) {
         String key = "rate_limit:" + apiKey;
 
         Long currentCount = redisTemplate.opsForValue().increment(key);
@@ -27,6 +28,6 @@ public class RateLimiterService {
             redisTemplate.expire(key, Duration.ofSeconds(60));
         }
 
-        return currentCount <= limitPerMinute;
+        return currentCount <= limit;
     }
 }

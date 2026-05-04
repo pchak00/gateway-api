@@ -1,9 +1,7 @@
 package com.prakash.gateaway_service.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.lettuce.core.dynamic.annotation.CommandNaming;
 import jakarta.persistence.*;
-import org.hibernate.annotations.AnyDiscriminatorImplicitValues;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +17,9 @@ public class Client {
     @Column(unique = true)
     private String apiKey;
 
-    private Integer requestsPerMinute;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "Plan_id", nullable = false)
+    private Plan plan;
 
     private Boolean active;
 
@@ -41,7 +41,6 @@ public class Client {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", apiKey='" + apiKey + '\'' +
-                ", requestsPerMinute=" + requestsPerMinute +
                 ", active=" + active +
                 '}';
     }
@@ -70,12 +69,12 @@ public class Client {
         this.apiKey = apiKey;
     }
 
-    public Integer getRequestsPerMinute() {
-        return requestsPerMinute;
+    public Plan getPlan() {
+        return plan;
     }
 
-    public void setRequestsPerMinute(Integer requestsPerMinute) {
-        this.requestsPerMinute = requestsPerMinute;
+    public void setPlan(Plan plan) {
+        this.plan = plan;
     }
 
     public Boolean getActive() {
