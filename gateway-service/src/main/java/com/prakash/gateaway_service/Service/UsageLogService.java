@@ -1,11 +1,13 @@
 package com.prakash.gateaway_service.Service;
 
+import com.prakash.gateaway_service.DTO.UsageLogResponseDto;
 import com.prakash.gateaway_service.Entity.Client;
 import com.prakash.gateaway_service.Entity.UsageLog;
 import com.prakash.gateaway_service.Repository.UsageLogRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class UsageLogService {
@@ -33,5 +35,20 @@ public class UsageLogService {
         usageLog.setTimestamp(LocalDateTime.now());
 
         usageLogRepository.save(usageLog);
+    }
+
+    public List<UsageLogResponseDto> getUsageByClient(Long clientId) {
+        return usageLogRepository.findByClientIdOrderByTimestampDesc(clientId)
+                .stream()
+                .map(log -> new UsageLogResponseDto(
+                        log.getId(),
+                        log.getPath(),
+                        log.getMethod(),
+                        log.getAllowed(),
+                        log.getStatusCode(),
+                        log.getReason(),
+                        log.getTimestamp()
+                ))
+                .toList();
     }
 }
