@@ -15,8 +15,8 @@ public class RateLimiterService {
         this.redisTemplate = redisTemplate;
     }
 
-    public boolean isAllowed(String apiKey, Integer limit) {
-        String key = "rate_limit:" + apiKey;
+    public boolean isAllowed(String apiKey, String path, Integer limit) {
+        String key = "rate_limit:" + apiKey+":"+path;
 
         Long currentCount = redisTemplate.opsForValue().increment(key);
 

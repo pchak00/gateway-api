@@ -3,6 +3,7 @@ package com.prakash.gateaway_service.Filter;
 
 import com.prakash.gateaway_service.Entity.Client;
 import com.prakash.gateaway_service.Repository.ClientRepository;
+import com.prakash.gateaway_service.Service.RateLimitResolverService;
 import com.prakash.gateaway_service.Service.RateLimiterService;
 import com.prakash.gateaway_service.Service.UsageLogService;
 import org.jspecify.annotations.NonNull;
@@ -20,11 +21,13 @@ public class ApiKeyFilter implements HandlerFilterFunction<ServerResponse, Serve
     private final ClientRepository clientRepository;
     private final RateLimiterService rateLimiterService;
     private final UsageLogService usageLogService;
+    private final RateLimitResolverService rateLimitResolverService;
 
-    public ApiKeyFilter(ClientRepository clientRepository, RateLimiterService rateLimiterService, UsageLogService usageLogService) {
+    public ApiKeyFilter(ClientRepository clientRepository, RateLimiterService rateLimiterService, UsageLogService usageLogService, RateLimitResolverService rateLimitResolverService) {
         this.clientRepository = clientRepository;
         this.rateLimiterService = rateLimiterService;
         this.usageLogService = usageLogService;
+        this.rateLimitResolverService = rateLimitResolverService;
     }
 
     @Override
@@ -55,8 +58,8 @@ public class ApiKeyFilter implements HandlerFilterFunction<ServerResponse, Serve
         }
 
         //check rate limit
-        Integer limit = client.getPlan().getRequestsPerMinute();
-        boolean isAllowed = rateLimiterService.isAllowed(client.getApiKey(), limit);
+        Integer limit = rateLimitResolverService.resolveLimit(client, path);
+        boolean isAllowed = rateLimiterService.isAllowed(client.getApiKey(), path, limit);
         if (!isAllowed) {
             usageLogService.log(client, path, method, false, 429, "Rate limit exceeded");
             return ServerResponse.status(429).body("Rate limit exceeded");
