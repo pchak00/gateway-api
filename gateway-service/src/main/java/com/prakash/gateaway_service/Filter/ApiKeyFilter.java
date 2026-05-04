@@ -4,7 +4,7 @@ package com.prakash.gateaway_service.Filter;
 import com.prakash.gateaway_service.Entity.Client;
 import com.prakash.gateaway_service.Repository.ClientRepository;
 import com.prakash.gateaway_service.Service.RateLimiterService;
-import org.apache.catalina.util.RateLimiter;
+import com.prakash.gateaway_service.Service.UsageLogService;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.function.HandlerFilterFunction;
@@ -19,10 +19,12 @@ public class ApiKeyFilter implements HandlerFilterFunction<ServerResponse, Serve
 
     private final ClientRepository clientRepository;
     private final RateLimiterService rateLimiterService;
+    private final UsageLogService usageLogService;
 
-    public ApiKeyFilter(ClientRepository clientRepository, RateLimiterService rateLimiterService) {
+    public ApiKeyFilter(ClientRepository clientRepository, RateLimiterService rateLimiterService, UsageLogService usageLogService) {
         this.clientRepository = clientRepository;
         this.rateLimiterService = rateLimiterService;
+        this.usageLogService = usageLogService;
     }
 
     @Override
@@ -44,18 +46,23 @@ public class ApiKeyFilter implements HandlerFilterFunction<ServerResponse, Serve
 
         //Check active
         Client client = clientOpt.get();
+        String path = request.path();
+        String method = request.method().name();
 
         if (!client.getActive()) {
+            usageLogService.log(client, path, method, false, 403, "Client inactive");
             return ServerResponse.status(403).body("Client is inactive");
         }
 
         //check rate limit
         boolean isAllowed = rateLimiterService.isAllowed(client.getApiKey(), client.getRequestsPerMinute());
         if (!isAllowed) {
+            usageLogService.log(client, path, method, false, 429, "Rate limit exceeded");
             return ServerResponse.status(429).body("Rate limit exceeded");
         }
 
         // Continue request
+        usageLogService.log(client, path, method, true, 200, "Client is allowed");
         return next.handle(request);
     }
 }
