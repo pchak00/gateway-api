@@ -21,6 +21,10 @@ public class Plan {
     @JsonIgnore
     private List<Client> clients = new ArrayList<>();
 
+    @OneToMany(mappedBy = "plan")
+    @JsonIgnore
+    private List<RouteLimit> routeLimits = new ArrayList<>();
+
     public List<Client> getClients() {
         return clients;
     }
@@ -66,6 +70,9 @@ public class Plan {
 
     public void addClient(Client client) {
         clients.add(client);
+    }
+    public void addRouteLimit(RouteLimit routeLimit) {
+        routeLimits.add(routeLimit);
     }
 
 }
