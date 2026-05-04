@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface UsageLogRepository extends JpaRepository<UsageLog, Long> {
-    public List<UsageLog> findByApiKeyOrderByTimestampDesc(String apiKey);
+    public List<UsageLog> findByClientIdOrderByTimestampDesc(String clientId);
 }

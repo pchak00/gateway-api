@@ -24,9 +24,7 @@ public class UsageLogService {
                     String reason) {
 
         UsageLog usageLog = new UsageLog();
-
-        usageLog.setApiKey(client.getApiKey());
-        usageLog.setClientName(client.getName());
+        usageLog.setClient(client);
         usageLog.setPath(path);
         usageLog.setMethod(method);
         usageLog.setAllowed(allowed);

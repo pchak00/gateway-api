@@ -1,8 +1,12 @@
 package com.prakash.gateaway_service.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.lettuce.core.dynamic.annotation.CommandNaming;
 import jakarta.persistence.*;
 import org.hibernate.annotations.AnyDiscriminatorImplicitValues;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Client {
@@ -18,6 +22,18 @@ public class Client {
     private Integer requestsPerMinute;
 
     private Boolean active;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "client")
+    @JsonIgnore
+    private List<UsageLog> usageLogs = new ArrayList<>();
+
+    public List<UsageLog> getUsageLogs() {
+        return usageLogs;
+    }
+
+    public void setUsageLogs(List<UsageLog> usageLogs) {
+        this.usageLogs = usageLogs;
+    }
 
     @Override
     public String toString() {
@@ -70,14 +86,10 @@ public class Client {
         this.active = active;
     }
 
+
     public Client() {
     }
 
-    public Client(Long id, String name, String apiKey, Integer requestsPerMinute, Boolean active) {
-        this.id = id;
-        this.name = name;
-        this.apiKey = apiKey;
-        this.requestsPerMinute = requestsPerMinute;
-        this.active = active;
-    }
+
+
 }

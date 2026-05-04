@@ -10,10 +10,6 @@ public class UsageLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String apiKey;
-
-    private String clientName;
-
     private String path;
 
     private String method;
@@ -26,20 +22,9 @@ public class UsageLog {
 
     private LocalDateTime timestamp;
 
-    @Override
-    public String toString() {
-        return "UsageLog{" +
-                "id=" + id +
-                ", apiKey='" + apiKey + '\'' +
-                ", clientName='" + clientName + '\'' +
-                ", path='" + path + '\'' +
-                ", method='" + method + '\'' +
-                ", allowed=" + allowed +
-                ", statusCode=" + statusCode +
-                ", reason='" + reason + '\'' +
-                ", timestamp=" + timestamp +
-                '}';
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id")
+    private Client client;
 
     public UsageLog() {
     }
@@ -52,20 +37,26 @@ public class UsageLog {
         this.id = id;
     }
 
-    public String getApiKey() {
-        return apiKey;
+    public Client getClient() {
+        return client;
     }
 
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
+    public void setClient(Client client) {
+        this.client = client;
     }
 
-    public String getClientName() {
-        return clientName;
-    }
-
-    public void setClientName(String clientName) {
-        this.clientName = clientName;
+    @Override
+    public String toString() {
+        return "UsageLog{" +
+                "id=" + id +
+                ", path='" + path + '\'' +
+                ", method='" + method + '\'' +
+                ", allowed=" + allowed +
+                ", statusCode=" + statusCode +
+                ", reason='" + reason + '\'' +
+                ", timestamp=" + timestamp +
+                ", client=" + client +
+                '}';
     }
 
     public String getPath() {
