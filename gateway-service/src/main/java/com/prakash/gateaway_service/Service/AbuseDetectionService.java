@@ -5,6 +5,7 @@ import com.prakash.gateaway_service.Entity.AbuseAlert;
 import com.prakash.gateaway_service.Entity.Client;
 import com.prakash.gateaway_service.Repository.AbuseAlertRepository;
 import com.prakash.gateaway_service.Repository.UsageLogRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,7 +23,7 @@ public class AbuseDetectionService {
         this.usageLogRepository = usageLogRepository;
         this.abuseAlertRepository = abuseAlertRepository;
     }
-
+@Transactional
     public void checkAndCreateAlert(Client client) {
 
         LocalDateTime windowStart = LocalDateTime.now().minusMinutes(5);
@@ -43,6 +44,10 @@ public class AbuseDetectionService {
                 LocalDateTime lastCreated = lastAlertOpt.get().getCreatedAt();
 
                 if (lastCreated.isAfter(now.minusMinutes(5))) {
+                    long newBlockCont =
+                            usageLogRepository.countByClientIdAndAllowedFalseAndTimestampAfter(client.getId(), lastAlertOpt.get().getWindowStart());
+                    lastAlertOpt.get().setBlockedRequestCount((int)newBlockCont); //update block count of existing alert
+                    abuseAlertRepository.save(lastAlertOpt.get());
                     return; // skip duplicate alert
                 }
             }
