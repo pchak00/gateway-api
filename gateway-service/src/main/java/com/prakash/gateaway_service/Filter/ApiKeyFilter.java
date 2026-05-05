@@ -3,6 +3,7 @@ package com.prakash.gateaway_service.Filter;
 
 import com.prakash.gateaway_service.Entity.Client;
 import com.prakash.gateaway_service.Repository.ClientRepository;
+import com.prakash.gateaway_service.Service.AbuseDetectionService;
 import com.prakash.gateaway_service.Service.RateLimitResolverService;
 import com.prakash.gateaway_service.Service.RateLimiterService;
 import com.prakash.gateaway_service.Service.UsageLogService;
@@ -22,12 +23,14 @@ public class ApiKeyFilter implements HandlerFilterFunction<ServerResponse, Serve
     private final RateLimiterService rateLimiterService;
     private final UsageLogService usageLogService;
     private final RateLimitResolverService rateLimitResolverService;
+    private final AbuseDetectionService abuseDetectionService;
 
-    public ApiKeyFilter(ClientRepository clientRepository, RateLimiterService rateLimiterService, UsageLogService usageLogService, RateLimitResolverService rateLimitResolverService) {
+    public ApiKeyFilter(ClientRepository clientRepository, RateLimiterService rateLimiterService, UsageLogService usageLogService, RateLimitResolverService rateLimitResolverService, AbuseDetectionService abuseDetectionService) {
         this.clientRepository = clientRepository;
         this.rateLimiterService = rateLimiterService;
         this.usageLogService = usageLogService;
         this.rateLimitResolverService = rateLimitResolverService;
+        this.abuseDetectionService = abuseDetectionService;
     }
 
     @Override
@@ -63,6 +66,11 @@ public class ApiKeyFilter implements HandlerFilterFunction<ServerResponse, Serve
         if (!isAllowed) {
             usageLogService.log(client, path, method, false, 429, "Rate limit exceeded");
             return ServerResponse.status(429).body("Rate limit exceeded");
+        }
+
+        //ABUSE CHECK
+        if(abuseDetectionService.isSuspicious(client)) {
+            System.out.println("SUSPICIOUS CLIENT ALLERT");
         }
 
         // Continue request

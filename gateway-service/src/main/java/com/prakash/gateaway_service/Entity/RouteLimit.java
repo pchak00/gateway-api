@@ -2,6 +2,11 @@ package com.prakash.gateaway_service.Entity;
 
 import jakarta.persistence.*;
 
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"plan_id", "route_pattern"})
+        }
+)
 @Entity
 public class RouteLimit {
 
