@@ -65,6 +65,11 @@ public class ApiKeyFilter implements HandlerFilterFunction<ServerResponse, Serve
         boolean isAllowed = rateLimiterService.isAllowed(client.getApiKey(), path, limit);
         if (!isAllowed) {
             usageLogService.log(client, path, method, false, 429, "Rate limit exceeded");
+
+
+            //ABUSE CHECK
+            abuseDetectionService.checkAndCreateAlert(client);
+
             return ServerResponse.status(429).body("Rate limit exceeded");
         }
 
