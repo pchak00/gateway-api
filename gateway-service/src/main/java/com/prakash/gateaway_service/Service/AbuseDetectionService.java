@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AbuseDetectionService {
@@ -25,6 +26,7 @@ public class AbuseDetectionService {
     public void checkAndCreateAlert(Client client) {
 
         LocalDateTime windowStart = LocalDateTime.now().minusMinutes(5);
+        LocalDateTime now = LocalDateTime.now();
 
         long blockedCount = usageLogRepository
                 .countByClientIdAndAllowedFalseAndTimestampAfter(
@@ -33,6 +35,17 @@ public class AbuseDetectionService {
                 );
 
         if(blockedCount >= 10) {
+            Optional<AbuseAlert> lastAlertOpt =
+                    abuseAlertRepository.findTopByClientIdOrderByCreatedAtDesc(client.getId());
+
+            // cooldown: 5 minutes
+            if (lastAlertOpt.isPresent()) {
+                LocalDateTime lastCreated = lastAlertOpt.get().getCreatedAt();
+
+                if (lastCreated.isAfter(now.minusMinutes(5))) {
+                    return; // skip duplicate alert
+                }
+            }
             AbuseAlert abuseAlert = new AbuseAlert();
             abuseAlert.setClient(client);
             abuseAlert.setMessage("Client exceeded blocked request threshold");
