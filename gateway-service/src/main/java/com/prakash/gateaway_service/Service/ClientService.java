@@ -1,16 +1,30 @@
 package com.prakash.gateaway_service.Service;
 
+import com.prakash.gateaway_service.DTO.ClientRequestDto;
+import com.prakash.gateaway_service.DTO.ClientResponseDto;
 import com.prakash.gateaway_service.DTO.ClientStatsResponseDto;
+import com.prakash.gateaway_service.Entity.Client;
+import com.prakash.gateaway_service.Entity.Plan;
+import com.prakash.gateaway_service.Repository.ClientRepository;
+import com.prakash.gateaway_service.Repository.PlanRepository;
 import com.prakash.gateaway_service.Repository.UsageLogRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ClientService {
 
     private final UsageLogRepository usageLogRepository;
+    private final ClientRepository clientRepository;
+    private final PlanRepository planRepository;
 
-    ClientService(UsageLogRepository usageLogRepository) {
+    ClientService(UsageLogRepository usageLogRepository,  ClientRepository clientRepository,  PlanRepository planRepository) {
         this.usageLogRepository = usageLogRepository;
+        this.clientRepository = clientRepository;
+        this.planRepository = planRepository;
     }
 
     public ClientStatsResponseDto getStats(Long clientId) {
@@ -22,5 +36,29 @@ public class ClientService {
         double blockRate = total == 0 ? 0 : ((double) blocked / total) * 100;
 
         return new ClientStatsResponseDto(clientId, total, allowed, blocked, blockRate);
+    }
+
+    public List<ClientResponseDto> showAllClients() {
+        List<ClientResponseDto> clientResponseDtoList = new ArrayList<>();
+        List<Client>  clients = clientRepository.findAll();
+        for( Client client : clients ) {
+            clientResponseDtoList.add(new ClientResponseDto(client.getName(), client.getApiKey(), client.getActive(),client.getPlan().getName()));
+        }
+        return clientResponseDtoList;
+    }
+
+    public ClientResponseDto addClient(ClientRequestDto clientRequestDto) {
+        Client client = new Client();
+
+        client.setName(clientRequestDto.name());
+        Plan plan = planRepository.findPlanByName(clientRequestDto.planName()).orElseThrow(() -> new RuntimeException("Plan not found"));
+        client.setPlan(plan);
+        plan.addClient(client);
+        client.setActive(clientRequestDto.active());
+        client.setApiKey(UUID.randomUUID().toString()); // api key generator
+
+        clientRepository.save(client);
+
+        return new ClientResponseDto(client.getName(), client.getApiKey(), client.getActive() ,client.getPlan().getName());
     }
 }

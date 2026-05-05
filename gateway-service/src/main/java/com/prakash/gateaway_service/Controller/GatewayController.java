@@ -1,6 +1,7 @@
 package com.prakash.gateaway_service.Controller;
 
 import com.prakash.gateaway_service.DTO.ClientRequestDto;
+import com.prakash.gateaway_service.DTO.ClientResponseDto;
 import com.prakash.gateaway_service.DTO.ClientStatsResponseDto;
 import com.prakash.gateaway_service.DTO.UsageLogResponseDto;
 import com.prakash.gateaway_service.Entity.Client;
@@ -18,34 +19,22 @@ import java.util.UUID;
 @RequestMapping("/admin/clients")
 public class GatewayController {
 
-    private ClientRepository clientRepository;
     private UsageLogService usageLogService;
     private ClientService clientService;
-    private PlanRepository planRepository;
 
-    GatewayController(ClientRepository clientRepository,  UsageLogService usageLogService, ClientService clientService,  PlanRepository planRepository) {
-        this.clientRepository = clientRepository;
+    GatewayController(UsageLogService usageLogService, ClientService clientService) {
         this.usageLogService = usageLogService;
         this.clientService = clientService;
-        this.planRepository = planRepository;
     }
 
     @PostMapping
-    public Client createClient(@RequestBody ClientRequestDto clientRequest) {
-        Client client = new Client();
-        client.setName(clientRequest.name());
-        Plan plan = planRepository.findPlanByName(clientRequest.planName()).orElseThrow(() -> new RuntimeException("Plan not found"));
-        client.setPlan(plan);
-        plan.addClient(client);
-        client.setActive(clientRequest.active());
-        client.setApiKey(UUID.randomUUID().toString()); // api key generator
-
-        return clientRepository.save(client);
+    public ClientResponseDto createClient(@RequestBody ClientRequestDto clientRequest) {
+        return clientService.addClient(clientRequest);
     }
 
     @GetMapping
-    public List<Client> showAllClient() {
-        return clientRepository.findAll();
+    public List<ClientResponseDto> showAllClient() {
+        return clientService.showAllClients();
     }
 
     @GetMapping("{clientId}/usage")
