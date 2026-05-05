@@ -69,9 +69,7 @@ public class ApiKeyFilter implements HandlerFilterFunction<ServerResponse, Serve
         }
 
         //ABUSE CHECK
-        if(abuseDetectionService.isSuspicious(client)) {
-            System.out.println("SUSPICIOUS CLIENT ALLERT");
-        }
+        abuseDetectionService.checkAndCreateAlert(client);
 
         // Continue request
         usageLogService.log(client, path, method, true, 200, "Client is allowed");
