@@ -4,6 +4,7 @@ import com.prakash.gateaway_service.DTO.LoginRequestDto;
 import com.prakash.gateaway_service.DTO.LoginResponseDto;
 import com.prakash.gateaway_service.Entity.AdminUser;
 import com.prakash.gateaway_service.Repository.AdminUserRepository;
+import com.prakash.gateaway_service.Service.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,11 +17,13 @@ public class AuthController {
 
     private final AdminUserRepository adminUserRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public AuthController(AdminUserRepository adminUserRepository,
-                          PasswordEncoder passwordEncoder) {
+                          PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.adminUserRepository = adminUserRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/login")
@@ -38,6 +41,7 @@ public class AuthController {
             throw new RuntimeException("Invalid username or password");
         }
 
-        return new LoginResponseDto("temporary-token");
+        String token = jwtService.generateToken(admin);
+        return new LoginResponseDto(token);
     }
 }
