@@ -1,0 +1,43 @@
+package com.prakash.gateaway_service.Controller;
+
+import com.prakash.gateaway_service.DTO.LoginRequestDto;
+import com.prakash.gateaway_service.DTO.LoginResponseDto;
+import com.prakash.gateaway_service.Entity.AdminUser;
+import com.prakash.gateaway_service.Repository.AdminUserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/auth")
+public class AuthController {
+
+    private final AdminUserRepository adminUserRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public AuthController(AdminUserRepository adminUserRepository,
+                          PasswordEncoder passwordEncoder) {
+        this.adminUserRepository = adminUserRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @PostMapping("/login")
+    public LoginResponseDto login(@RequestBody LoginRequestDto request) {
+
+        AdminUser admin = adminUserRepository.findByUsername(request.username())
+                .orElseThrow(() -> new RuntimeException("Invalid username or password"));
+
+        boolean passwordMatches = passwordEncoder.matches(
+                request.password(),
+                admin.getPassword()
+        );
+
+        if (!passwordMatches) {
+            throw new RuntimeException("Invalid username or password");
+        }
+
+        return new LoginResponseDto("temporary-token");
+    }
+}

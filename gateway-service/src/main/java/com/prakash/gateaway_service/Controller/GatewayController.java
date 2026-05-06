@@ -1,7 +1,6 @@
 package com.prakash.gateaway_service.Controller;
 
 import com.prakash.gateaway_service.DTO.*;
-import com.prakash.gateaway_service.Entity.AbuseAlert;
 import com.prakash.gateaway_service.Service.AbuseDetectionService;
 import com.prakash.gateaway_service.Service.ClientService;
 import com.prakash.gateaway_service.Service.UsageLogService;
