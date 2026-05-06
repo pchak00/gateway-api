@@ -3,6 +3,7 @@ package com.prakash.gateaway_service.Controller;
 import com.prakash.gateaway_service.DTO.LoginRequestDto;
 import com.prakash.gateaway_service.DTO.LoginResponseDto;
 import com.prakash.gateaway_service.Entity.AdminUser;
+import com.prakash.gateaway_service.Exception.InvalidCredentialsException;
 import com.prakash.gateaway_service.Repository.AdminUserRepository;
 import com.prakash.gateaway_service.Service.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,7 +31,7 @@ public class AuthController {
     public LoginResponseDto login(@RequestBody LoginRequestDto request) {
 
         AdminUser admin = adminUserRepository.findByUsername(request.username())
-                .orElseThrow(() -> new RuntimeException("Invalid username or password"));
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid username or password"));
 
         boolean passwordMatches = passwordEncoder.matches(
                 request.password(),
@@ -38,7 +39,7 @@ public class AuthController {
         );
 
         if (!passwordMatches) {
-            throw new RuntimeException("Invalid username or password");
+            throw new InvalidCredentialsException("Invalid username or password");
         }
 
         String token = jwtService.generateToken(admin);
