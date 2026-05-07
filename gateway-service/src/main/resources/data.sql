@@ -17,6 +17,15 @@ INSERT INTO admin_user (username, password, role)
 VALUES (
            'admin',
            '$2a$10$VesL5BPpxoJCpR3IyPN58uSDxrCpElhhO0x0P38VrttzV2dk1js0i',
-           'ADMIN'
+           'SUPER_ADMIN'
+       )
+    ON CONFLICT (username) DO NOTHING;
+
+
+INSERT INTO admin_user (username, password, role)
+VALUES (
+           'viewer',
+           '$2a$10$VesL5BPpxoJCpR3IyPN58uSDxrCpElhhO0x0P38VrttzV2dk1js0i',
+           'READ_ONLY_ADMIN'
        )
     ON CONFLICT (username) DO NOTHING;

@@ -4,6 +4,7 @@ package com.prakash.gateaway_service.Config;
 import com.prakash.gateaway_service.Filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +28,19 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
+
+                        .requestMatchers("/admin/clients/*/usage").hasAnyRole("SUPER_ADMIN", "READ_ONLY_ADMIN")
+                        .requestMatchers("/admin/clients/*/stats").hasAnyRole("SUPER_ADMIN", "READ_ONLY_ADMIN")
+                        .requestMatchers("/admin/clients/*/abuse").hasAnyRole("SUPER_ADMIN", "READ_ONLY_ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/admin/clients/**").hasAnyRole("SUPER_ADMIN", "READ_ONLY_ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/admin/plans/**").hasAnyRole("SUPER_ADMIN", "READ_ONLY_ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/admin/route-limits/**").hasAnyRole("SUPER_ADMIN", "READ_ONLY_ADMIN")
+
+                        .requestMatchers("/admin/clients/**").hasRole("SUPER_ADMIN")
+                        .requestMatchers("/admin/plans/**").hasRole("SUPER_ADMIN")
+                        .requestMatchers("/admin/route-limits/**").hasRole("SUPER_ADMIN")
+
                         .requestMatchers("/admin/**").authenticated()
                         .anyRequest().permitAll()
                 )

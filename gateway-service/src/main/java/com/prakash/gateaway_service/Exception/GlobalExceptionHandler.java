@@ -14,7 +14,7 @@ public class GlobalExceptionHandler {
             InvalidCredentialsException e, HttpServletRequest request
     ) {
         ExceptionResponse response = new ExceptionResponse(HttpStatus.UNAUTHORIZED.value(),
-                e.getMessage(), System.currentTimeMillis(), request.getRemoteAddr());
+                e.getMessage(), System.currentTimeMillis(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 }

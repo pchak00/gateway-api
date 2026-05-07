@@ -4,16 +4,24 @@ import com.prakash.gateaway_service.Entity.AdminUser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
 @Service
 public class JwtService {
 
-    private static final String SECRET_KEY =
-            "myverysecuresecretkeymyverysecuresecretkey";
+
+    private final String secretKey;
+    private final long expirationMs;
+
+    public JwtService(@Value("${jwt.secret}")String secretKey, @Value("${jwt.expiration-ms}") long expirationMs) {
+        this.secretKey = secretKey;
+        this.expirationMs = expirationMs;
+    }
 
     public String generateToken(AdminUser adminUser) {
 
@@ -22,7 +30,7 @@ public class JwtService {
                 .claim("role", adminUser.getRole())
                 .setIssuedAt(new Date())
                 .setExpiration(
-                        new Date(System.currentTimeMillis() + 1000 * 60 * 60)
+                        new Date(System.currentTimeMillis() + expirationMs)
                 )
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
@@ -30,7 +38,7 @@ public class JwtService {
 
     private Key getSigningKey() {
 
-        byte[] keyBytes = SECRET_KEY.getBytes();
+        byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
 
         return Keys.hmacShaKeyFor(keyBytes);
     }
