@@ -1,6 +1,7 @@
 package com.prakash.gateaway_service.Config;
 
 import com.prakash.gateaway_service.Filter.ApiKeyFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.function.RouterFunction;
@@ -13,12 +14,15 @@ import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFuncti
 @Configuration
 public class GatewayRoutesConfig {
 
+    @Value("${backend.service.url}")
+    private String backendServiceUrl;
+
     @Bean
     public RouterFunction<ServerResponse> backendRoute(ApiKeyFilter apiKeyFilter) {
         return route("backend-service-route")
                 .GET("/api/**", http())
                 .filter(apiKeyFilter)
-                .before(uri("http://localhost:8081"))
+                .before(uri(backendServiceUrl))
                 .build();
     }
 }
