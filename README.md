@@ -11,7 +11,7 @@ Features include:
 - usage analytics
 - abuse detection
 
-Designed as a developer-friendly, SaaS-oriented gateway platform for small-to-mid sized teams.
+Designed as a developer-first, SaaS-oriented gateway platform for small-to-mid sized teams.
 
 ## Why This Project?
 
@@ -19,7 +19,7 @@ Modern applications increasingly rely on API gateways for authentication,
 traffic management, rate limiting, observability, and security.
 
 Existing solutions such as Kong, AWS API Gateway, Apigee, and NGINX-based setups
-are powerful, very expensive and often optimized toward either:
+are powerful, but can be very expensive and often optimized toward either:
 
 - infrastructure-heavy configurations
 - enterprise-scale deployments
@@ -49,10 +49,6 @@ The architecture is easiest to understand through two main request flows:
 
 1. **API Consumer Flow** — requests made by external clients using API keys
 2. **Admin Platform Flow** — requests made by admins using JWT authentication and role-based authorization
-
-### API Consumer Flow
-
-This flow represents requests made by external API consumers to protected backend services.
 
 ### API Consumer Flow
 
@@ -109,3 +105,182 @@ flowchart TD
 
     K --> L[Return Admin Response]
 ```
+
+### Infrastructure & Service Responsibilities
+
+The system is separated into multiple services so each component has a clear responsibility.
+
+#### Gateway Service
+
+The Gateway Service is the core application in the system. It acts as the central policy enforcement layer for incoming traffic.
+
+Responsibilities include:
+
+- validating API keys for API consumers
+- resolving plan-based and route-specific rate limits
+- forwarding valid requests to backend services
+- recording usage logs for analytics
+- tracking blocked requests for abuse detection
+- protecting admin endpoints with JWT authentication and role-based authorization
+
+#### Redis
+
+Redis is used for fast, shared rate-limiting counters.
+
+Rate limit state is kept outside the gateway process so the system is not dependent on local application memory. This allows multiple gateway instances to share request counters and supports a more horizontally scalable design.
+
+#### PostgreSQL
+
+PostgreSQL stores persistent platform data such as:
+
+- clients and API keys
+- plans and quota rules
+- route-specific limits
+- usage logs
+- abuse alerts
+- admin users and roles
+
+#### Backend Service
+
+The Backend Service is a demo service used to validate gateway behavior.
+
+It exists mainly for routing demonstrations, integration testing, and showing how protected backend APIs can sit behind the gateway.
+
+#### Docker Compose
+
+Docker Compose is used to run the full system locally with separate containers for the gateway, backend service, Redis, and PostgreSQL.
+
+This creates a more production-like development environment and demonstrates container networking, service isolation, and infrastructure configuration.
+
+## Core Features
+
+### Traffic Management
+
+#### Plan-Based Rate Limiting
+
+Clients are assigned to centralized plans such as `FREE`, `PRO`, and `ENTERPRISE`, each with configurable default request quotas.
+
+This allows quota policies to be managed centrally without duplicating configuration across individual clients.
+
+#### Route-Specific Traffic Policies
+
+The gateway supports route-level rate limit overrides for endpoints with different operational costs.
+
+For example, expensive endpoints such as AI inference, image generation, or report-processing APIs can enforce stricter limits than lightweight endpoints, even when clients belong to the same plan.
+
+When a route-specific policy exists, it overrides the default plan quota for that endpoint.
+
+#### Distributed Redis-Backed Rate Limiting
+
+Rate limiting uses Redis-based shared counters instead of local in-memory tracking.
+
+This allows multiple gateway instances to share rate limit state consistently and supports a more horizontally scalable architecture compared to application-local counters.
+
+#### Centralized Policy Enforcement
+
+Traffic policies are enforced at the gateway layer before requests reach backend services.
+
+This allows authentication, quota enforcement, and traffic control to remain centralized rather than being duplicated across individual backend applications.
+
+### Authentication & Authorization
+
+#### API Key Authentication
+
+External API consumers authenticate using API keys provided through the `X-API-Key` header.
+
+Requests are validated at the gateway layer before traffic is forwarded to backend services.
+
+#### JWT-Based Admin Authentication
+
+Administrative platform endpoints are protected using JWT-based authentication.
+
+Admins authenticate through a login endpoint and receive a signed JWT access token used for subsequent protected requests.
+
+#### Role-Based Authorization
+
+Administrative actions are protected using role-based access control.
+
+Current roles include:
+
+- `READ_ONLY_ADMIN` — can access monitoring and observability endpoints such as analytics, usage statistics, and abuse alerts
+- `SUPER_ADMIN` — has full access to management operations including clients, plans, route policies, and administrative configuration
+
+This separation allows sensitive platform operations to remain protected while still supporting restricted operational visibility for lower-privileged administrators.
+
+#### Centralized Security Enforcement
+
+Authentication and authorization are enforced centrally at the gateway layer rather than being duplicated across backend services.
+
+This keeps security policies consistent across the platform and simplifies backend service design.## Analytics & Abuse Detection
+
+### Analytics & Abuse Detection
+
+#### Usage Logging
+
+Requests processed through the gateway are recorded for monitoring and analytics purposes.
+
+Logged information includes:
+- client identity
+- request path
+- HTTP method
+- status code
+- request timestamp
+- allowed or blocked request state
+
+#### Analytics & Monitoring
+
+Usage data is aggregated to support operational analytics and platform monitoring.
+
+This allows administrators to observe:
+- request activity
+- blocked traffic patterns
+- client usage behavior
+- route-level traffic trends
+
+#### Abuse Detection
+
+The platform monitors blocked request activity to identify potentially abusive behavior.
+
+When clients repeatedly exceed configured rate limits within a defined time window, the system evaluates abuse thresholds and tracks suspicious activity patterns.
+
+#### Alerting System
+
+When abuse thresholds are exceeded, the gateway creates or updates abuse alerts associated with the affected client.
+
+A cooldown mechanism is used to avoid repeatedly generating duplicate alerts for the same abusive activity window.
+
+## Infrastructure & Deployment
+
+### Dockerized Multi-Service Architecture
+
+The platform is fully containerized using Docker and Docker Compose.
+
+Separate containers are used for:
+- Gateway Service
+- Backend Service
+- Redis
+- PostgreSQL
+
+This keeps infrastructure responsibilities isolated and creates a more production-like development environment.
+
+### Container Networking
+
+Services communicate through Docker Compose networking using service-level DNS resolution rather than localhost-based communication.
+
+This more closely mirrors real distributed backend deployments where services communicate across isolated runtime environments.
+
+### Environment-Based Configuration
+
+Service configuration is managed through environment variables and container configuration rather than hardcoded infrastructure settings.
+
+This simplifies deployment portability and environment-specific configuration management.
+
+### Production-Oriented Separation
+
+The architecture separates:
+- traffic management
+- backend business services
+- distributed caching/state
+- persistent storage
+
+into independent services that can be scaled, replaced, or deployed separately.
