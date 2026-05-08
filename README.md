@@ -284,3 +284,112 @@ The architecture separates:
 - persistent storage
 
 into independent services that can be scaled, replaced, or deployed separately.
+
+## Getting Started
+
+### Prerequisites
+
+Before running the project, ensure Docker is installed and running and for convenience use an api tester like Insomnia or Postman.
+
+---
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/pchak00/gateway-api.git
+cd smart-api-gateway
+```
+
+---
+
+### Start the Platform
+
+Build and start all services:
+
+```bash
+docker compose up --build
+```
+
+This starts the following services:
+
+| Service | Port |
+|---|---|
+| Gateway Service | `8080` |
+| Backend Service | `8081` |
+| PostgreSQL | `5432` |
+| Redis | `6379` |
+
+---
+
+### Verify the Gateway
+
+Example request using an API key:
+
+```bash
+curl -X GET http://localhost:8080/api/products \
+  -H "X-API-Key: YOUR_API_KEY"
+```
+
+---
+
+### Stop the Platform
+
+```bash
+docker compose down
+```
+
+## Upcomming Updates
+
+Planned improvements and future platform enhancements include:
+
+### Advanced Rate Limiting Algorithms
+
+The current implementation uses a fixed-window rate limiting strategy.
+
+Future versions will introduce:
+- sliding window rate limiting
+- token bucket algorithms
+- burst traffic handling
+- dynamic quota policies
+
+to provide more accurate and flexible traffic control behavior.
+
+### Multi-Tenant Platform Support
+
+Future versions will support tenant or organization-level resource management, allowing multiple teams or companies to manage clients, plans, and gateway configuration within isolated platform boundaries.
+
+### Webhook-Based Alerting
+
+The abuse detection system may be extended with webhook notifications for operational alerts such as:
+- repeated rate limit violations
+- suspicious traffic activity
+- quota exhaustion events
+
+### Enhanced Analytics & Observability
+
+Planned improvements include:
+- real-time traffic dashboards
+- request trend visualization
+- client-level usage insights
+- route-level analytics
+- operational monitoring improvements
+
+### Management UI
+
+A future management interface may provide a web-based dashboard for operating the gateway without manually calling admin APIs.
+
+Planned UI capabilities may include:
+
+- admin login page
+- client creation and API key management
+- plan assignment and quota updates
+- route-specific rate limit configuration
+- analytics and usage dashboards
+- abuse alert review
+- admin user management
+
+## Feedback & Contributions
+
+Feedback, bug reports, and improvement suggestions are welcome.
+
+If you encounter issues while running the platform or have ideas for improvements, feel free to open an issue or reach out through GitHub discussions.
