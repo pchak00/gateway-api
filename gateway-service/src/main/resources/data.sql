@@ -16,7 +16,7 @@ SELECT id, '/api/reports', 2 FROM plan WHERE name = 'FREE'
 INSERT INTO admin_user (username, password, role)
 VALUES (
            'admin',
-           '$2a$10$VesL5BPpxoJCpR3IyPN58uSDxrCpElhhO0x0P38VrttzV2dk1js0i',
+           '$2a$10$VesL5BPpxoJCpR3IyPN58uSDxrCpElhhO0x0P38VrttzV2dk1js0i', -- admin123
            'SUPER_ADMIN'
        )
     ON CONFLICT (username) DO NOTHING;
@@ -25,7 +25,28 @@ VALUES (
 INSERT INTO admin_user (username, password, role)
 VALUES (
            'viewer',
-           '$2a$10$VesL5BPpxoJCpR3IyPN58uSDxrCpElhhO0x0P38VrttzV2dk1js0i',
+           '$2a$10$VesL5BPpxoJCpR3IyPN58uSDxrCpElhhO0x0P38VrttzV2dk1js0i', -- admin123
            'READ_ONLY_ADMIN'
        )
     ON CONFLICT (username) DO NOTHING;
+
+INSERT INTO client (name, api_key, plan_id, active)
+SELECT
+    'Demo Free Client',
+    'free-demo-api-key',
+    id,
+    true
+FROM plan
+WHERE name = 'FREE'
+    ON CONFLICT (api_key) DO NOTHING;
+
+
+INSERT INTO client (name, api_key, plan_id, active)
+SELECT
+    'Demo Pro Client',
+    'pro-demo-api-key',
+    id,
+    true
+FROM plan
+WHERE name = 'PRO'
+    ON CONFLICT (api_key) DO NOTHING;
