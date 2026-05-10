@@ -15,7 +15,7 @@ SELECT id, '/api/reports', 2 FROM plan WHERE name = 'FREE'
 
 INSERT INTO admin_user (username, password, role)
 VALUES (
-           'admin',
+           'super admin',
            '$2a$10$VesL5BPpxoJCpR3IyPN58uSDxrCpElhhO0x0P38VrttzV2dk1js0i', -- admin123
            'SUPER_ADMIN'
        )
